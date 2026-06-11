@@ -1,4 +1,4 @@
-import type { LocationCategory } from "../types/location";
+import type { LocationCategory, LocationChapter, MapIconType } from "../types/location";
 
 export const CATEGORY_FILTERS: LocationCategory[] = [
   "Ten-Towns",
@@ -18,4 +18,24 @@ export const CATEGORY_CLASS: Record<LocationCategory, string> = {
   Settlements: "settlement",
   "Dungeons / Ruins": "dungeon",
   "DM / Spoiler": "spoiler",
+};
+
+export const CHAPTER_FILTERS: LocationChapter[] = [
+  "Chapter 1",
+  "Chapter 2",
+  "Chapter 3",
+  "Chapter 4",
+  "Chapter 5",
+  "Chapter 6",
+  "Chapter 7",
+];
+
+export const MAP_ICON_CLASS: Record<MapIconType, string> = {
+  town: "icon-town",
+  geography: "icon-geography",
+  road: "icon-road",
+  "adventure-diamond": "icon-adventure-diamond",
+  ruin: "icon-ruin",
+  dungeon: "icon-dungeon",
+  other: "icon-other",
 };

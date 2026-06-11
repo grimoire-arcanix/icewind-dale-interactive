@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import L from "leaflet";
-import { CATEGORY_CLASS, CATEGORY_FILTERS } from "./data/categories";
+import { CATEGORY_CLASS, CATEGORY_FILTERS, CHAPTER_FILTERS, MAP_ICON_CLASS } from "./data/categories";
 import { locations } from "./data/locations";
-import type { LocationCategory, LocationEntry } from "./types/location";
+import type { LocationCategory, LocationChapter, LocationEntry } from "./types/location";
 import {
   getImageBounds,
   imagePixelToLatLng,
@@ -14,21 +14,30 @@ import {
 } from "./utils/mapCoordinates";
 
 const STORAGE_KEY = "icewind-dale-dm-notes";
-const SPOILER_TAG = "spoiler";
 const DUNGEON_TAG = "dungeon";
 const searchableText = (location: LocationEntry) =>
-  `${location.name} ${location.category} ${location.summary} ${location.tags.join(" ")}`.toLowerCase();
+  [
+    location.name,
+    location.category,
+    location.chapter ?? "",
+    location.summary,
+    location.lore,
+    location.history ?? "",
+    location.adventureRelevance ?? "",
+    location.tags.join(" "),
+    location.notableFeatures.join(" "),
+    location.notablePeopleOrFactions.join(" "),
+    location.dmHooks.join(" "),
+  ]
+    .join(" ")
+    .toLowerCase();
 
 function slugFromHash() {
   return decodeURIComponent(window.location.hash.replace(/^#/, ""));
 }
 
-function locationMatchesFilter(location: LocationEntry, filters: Set<LocationCategory>) {
-  if (location.tags.includes(SPOILER_TAG) && !filters.has("DM / Spoiler")) {
-    return false;
-  }
-
-  if (filters.has(location.category)) {
+function locationMatchesCategory(location: LocationEntry, filters: Set<LocationCategory>) {
+  if (location.isDmSpoiler && filters.has("DM / Spoiler")) {
     return true;
   }
 
@@ -36,7 +45,7 @@ function locationMatchesFilter(location: LocationEntry, filters: Set<LocationCat
     return true;
   }
 
-  if (filters.has("DM / Spoiler") && location.tags.includes(SPOILER_TAG)) {
+  if (filters.has(location.category)) {
     return true;
   }
 
@@ -47,17 +56,22 @@ function locationMatchesFilter(location: LocationEntry, filters: Set<LocationCat
   return false;
 }
 
-function createMarkerIcon(location: LocationEntry, isSelected: boolean) {
+function createMarkerIcon(location: LocationEntry, isSelected: boolean, currentZoom: number) {
   const categoryClass = CATEGORY_CLASS[location.category];
+  const iconClass = MAP_ICON_CLASS[location.mapIconType];
   const confidenceClass = `confidence-${location.positionConfidence}`;
+  const spoilerClass = location.isDmSpoiler ? "is-dm-spoiler" : "is-player-facing";
   const selectedClass = isSelected ? "is-selected" : "";
-  const warning = location.positionConfidence === "visible" ? "" : '<span class="marker-warning">!</span>';
+  const lowZoomClass = currentZoom < -1.2 ? "is-low-zoom" : "";
+  const warning =
+    location.positionConfidence === "visible" ? "" : '<span class="marker-warning">!</span>';
+  const chapter = location.chapter ? `<small>${location.chapter}</small>` : "";
 
   return L.divIcon({
     className: "atlas-marker-icon",
     html: `
-      <div class="atlas-marker ${categoryClass} ${confidenceClass} ${selectedClass}">
-        <span class="atlas-marker-label">${location.name}</span>
+      <div class="atlas-marker ${categoryClass} ${iconClass} ${confidenceClass} ${spoilerClass} ${selectedClass} ${lowZoomClass}">
+        <span class="atlas-marker-label">${location.name}${chapter}</span>
         <span class="atlas-marker-dot" aria-hidden="true">${warning}</span>
       </div>
     `,
@@ -78,6 +92,10 @@ function App() {
   const [activeFilters, setActiveFilters] = useState<Set<LocationCategory>>(
     () => new Set(CATEGORY_FILTERS.filter((category) => category !== "DM / Spoiler")),
   );
+  const [activeChapters, setActiveChapters] = useState<Set<LocationChapter>>(
+    () => new Set(CHAPTER_FILTERS),
+  );
+  const [visibilityFilter, setVisibilityFilter] = useState<"all" | "player" | "dm">("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dmMode, setDmMode] = useState(() => localStorage.getItem(STORAGE_KEY) === "true");
   const [debugMode, setDebugMode] = useState(
@@ -86,6 +104,7 @@ function App() {
   const [cursorPixel, setCursorPixel] = useState<{ x: number; y: number } | null>(null);
   const [imageState, setImageState] = useState<"loading" | "ready" | "error">("loading");
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+  const [currentZoom, setCurrentZoom] = useState(-2);
 
   debugModeRef.current = debugMode;
 
@@ -96,13 +115,29 @@ function App() {
 
   const filteredLocations = useMemo(() => {
     const trimmedQuery = query.trim().toLowerCase();
+    const allChaptersActive = activeChapters.size === CHAPTER_FILTERS.length;
 
     return locations.filter((location) => {
+      if (location.isDmSpoiler && !dmMode) {
+        return false;
+      }
+
+      if (visibilityFilter === "player" && !location.playerFacing) {
+        return false;
+      }
+
+      if (visibilityFilter === "dm" && !location.isDmSpoiler) {
+        return false;
+      }
+
       const matchesSearch = !trimmedQuery || searchableText(location).includes(trimmedQuery);
-      const matchesCategory = locationMatchesFilter(location, activeFilters);
-      return matchesSearch && matchesCategory;
+      const matchesCategory = locationMatchesCategory(location, activeFilters);
+      const matchesChapter =
+        allChaptersActive || (location.chapter ? activeChapters.has(location.chapter) : false);
+
+      return matchesSearch && matchesCategory && matchesChapter;
     });
-  }, [activeFilters, query]);
+  }, [activeChapters, activeFilters, dmMode, query, visibilityFilter]);
 
   const focusLocation = useCallback((location: LocationEntry, zoom = 1.35) => {
     const map = mapRef.current;
@@ -185,6 +220,7 @@ function App() {
     const bounds = getImageBounds(map);
     map.setMaxBounds(bounds.pad(0.18));
     map.fitBounds(bounds, { animate: false, padding: [20, 20] });
+    setCurrentZoom(map.getZoom());
 
     const overlay = L.imageOverlay(MAP_IMAGE_URL, bounds, {
       alt: "Illustrated fantasy map of Icewind Dale",
@@ -230,6 +266,7 @@ function App() {
 
     map.on("mousemove", handleMove);
     map.on("click", handleDebugClick);
+    map.on("zoomend", () => setCurrentZoom(map.getZoom()));
 
     return () => {
       map.off("mousemove", handleMove);
@@ -253,7 +290,7 @@ function App() {
 
     filteredLocations.forEach((location) => {
       const marker = L.marker(imagePixelToLatLng(map, location.x, location.y), {
-        icon: createMarkerIcon(location, selectedId === location.id),
+        icon: createMarkerIcon(location, selectedId === location.id, currentZoom),
         title: location.name,
         keyboard: true,
         alt: location.name,
@@ -270,7 +307,7 @@ function App() {
       marker.addTo(layer);
       markerRefs.current.set(location.id, marker);
     });
-  }, [filteredLocations, focusLocation, selectedId]);
+  }, [currentZoom, filteredLocations, focusLocation, selectedId]);
 
   useEffect(() => {
     const openHashLocation = () => {
@@ -280,7 +317,7 @@ function App() {
       }
 
       const hashLocation = locations.find((location) => location.id === id);
-      if (hashLocation) {
+      if (hashLocation && (!hashLocation.isDmSpoiler || dmMode)) {
         focusLocation(hashLocation, 1.1);
       }
     };
@@ -292,7 +329,7 @@ function App() {
       window.clearTimeout(timeout);
       window.removeEventListener("hashchange", openHashLocation);
     };
-  }, [focusLocation]);
+  }, [dmMode, focusLocation]);
 
   useEffect(() => {
     mapRef.current?.getContainer().classList.toggle("is-debugging", debugMode);
@@ -311,7 +348,34 @@ function App() {
     });
   };
 
+  const toggleChapter = (chapter: LocationChapter) => {
+    setActiveChapters((current) => {
+      const next = new Set(current);
+      if (next.has(chapter)) {
+        next.delete(chapter);
+      } else {
+        next.add(chapter);
+      }
+      return next;
+    });
+  };
+
   const showAllFilters = () => setActiveFilters(new Set(CATEGORY_FILTERS));
+
+  const showAllTenTowns = () => {
+    setActiveFilters(new Set(["Ten-Towns", "Settlements"]));
+    setActiveChapters(new Set(["Chapter 1"]));
+    setVisibilityFilter("player");
+  };
+
+  const showAdventureLocations = () => {
+    setDmMode(true);
+    setActiveFilters(new Set(["Rime of the Frostmaiden Locations", "Dungeons / Ruins", "DM / Spoiler"]));
+    setActiveChapters(new Set(CHAPTER_FILTERS.filter((chapter) => chapter !== "Chapter 1")));
+    setVisibilityFilter("dm");
+  };
+
+  const showAllChapters = () => setActiveChapters(new Set(CHAPTER_FILTERS));
 
   const copySelectedLink = async () => {
     if (!selectedLocation) {
@@ -368,7 +432,7 @@ function App() {
               checked={dmMode}
               onChange={(event) => setDmMode(event.target.checked)}
             />
-            <span>DM Notes</span>
+            <span>DM Notes <em>reveals adventure spoilers</em></span>
           </label>
         </div>
 
@@ -377,6 +441,15 @@ function App() {
             <h2>Filters</h2>
             <button type="button" onClick={showAllFilters}>
               All
+            </button>
+          </div>
+
+          <div className="preset-row" aria-label="Filter presets">
+            <button type="button" onClick={showAllTenTowns}>
+              Ten-Towns
+            </button>
+            <button type="button" onClick={showAdventureLocations}>
+              Adventures
             </button>
           </div>
 
@@ -395,12 +468,57 @@ function App() {
             ))}
           </div>
 
+          <div className="filter-group">
+            <div className="panel-title-row">
+              <h2>Chapters</h2>
+              <button type="button" onClick={showAllChapters}>
+                All
+              </button>
+            </div>
+            <div className="chapter-list">
+              {CHAPTER_FILTERS.map((chapter) => (
+                <button
+                  key={chapter}
+                  type="button"
+                  className={activeChapters.has(chapter) ? "is-active" : ""}
+                  onClick={() => toggleChapter(chapter)}
+                  aria-pressed={activeChapters.has(chapter)}
+                >
+                  {chapter.replace("Chapter ", "Ch. ")}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="filter-group">
+            <h2>Visibility</h2>
+            <div className="segmented-control">
+              {(["all", "player", "dm"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  className={visibilityFilter === mode ? "is-active" : ""}
+                  onClick={() => setVisibilityFilter(mode)}
+                  aria-pressed={visibilityFilter === mode}
+                >
+                  {mode === "all" ? "All" : mode === "player" ? "Player" : "DM"}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="legend" aria-label="Marker legend">
             <span>
               <i className="legend-dot confidence-visible" /> Visible
             </span>
             <span>
+              <i className="legend-diamond" /> DM / Adventure Location
+            </span>
+            <span>
               <i className="legend-dot confidence-approximate" /> Approx.
+            </span>
+            <span>
+              <i className="legend-dot confidence-reference-derived" /> Ref.
             </span>
             <span>
               <i className="legend-dot confidence-needs-review" /> Review
@@ -444,7 +562,8 @@ function App() {
                 onClick={() => focusLocation(location)}
               >
                 <span>{location.name}</span>
-                {location.tags.includes(SPOILER_TAG) && <strong>!</strong>}
+                {location.chapter && <small>{location.chapter}</small>}
+                {location.isDmSpoiler && <strong>!</strong>}
               </button>
             ))}
           </div>
@@ -482,7 +601,7 @@ interface LorePanelProps {
 }
 
 function LorePanel({ location, dmMode, copyState, onClose, onCopy }: LorePanelProps) {
-  const hasSpoilerTag = location.tags.includes(SPOILER_TAG);
+  const coordinateNeedsReview = location.positionConfidence !== "visible";
 
   return (
     <aside className="lore-panel" aria-label={`${location.name} lore panel`}>
@@ -490,6 +609,15 @@ function LorePanel({ location, dmMode, copyState, onClose, onCopy }: LorePanelPr
         <div>
           <p>{location.category}</p>
           <h2>{location.name}</h2>
+          <div className="badge-list">
+            <span className={location.playerFacing ? "badge player-badge" : "badge spoiler-badge"}>
+              {location.playerFacing ? "Player-facing" : "DM spoiler"}
+            </span>
+            {location.chapter && <span className="badge chapter-badge">{location.chapter}</span>}
+            {coordinateNeedsReview && (
+              <span className="badge coordinate-badge">{location.positionConfidence}</span>
+            )}
+          </div>
         </div>
         <button type="button" aria-label="Close lore panel" onClick={onClose}>
           x
@@ -497,33 +625,71 @@ function LorePanel({ location, dmMode, copyState, onClose, onCopy }: LorePanelPr
       </div>
 
       <div className="lore-body">
-        {hasSpoilerTag && <div className="spoiler-alert">Spoiler-heavy location. DM notes are hidden by default.</div>}
+        {location.isDmSpoiler && (
+          <div className="spoiler-alert">
+            DM spoiler location. DM Notes reveals adventure spoilers and hidden planning details.
+          </div>
+        )}
 
         <section>
-          <h3>At a Glance</h3>
+          <h3>Overview</h3>
           <p>{location.summary}</p>
         </section>
 
-        <section>
+        {location.lore && <section>
           <h3>Lore</h3>
           <p>{location.lore}</p>
-        </section>
+        </section>}
+
+        {location.history && (
+          <section>
+            <h3>History &amp; Context</h3>
+            <p>{location.history}</p>
+          </section>
+        )}
+
+        {(location.notableFeatures.length > 0 || location.notablePeopleOrFactions.length > 0) && (
+          <section>
+            <h3>Notable Features</h3>
+            {location.notableFeatures.length > 0 && (
+              <ul>
+                {location.notableFeatures.map((feature) => (
+                  <li key={feature}>{feature}</li>
+                ))}
+              </ul>
+            )}
+            {location.notablePeopleOrFactions.length > 0 && (
+              <>
+                <h4>People, Factions, Monsters</h4>
+                <ul>
+                  {location.notablePeopleOrFactions.map((feature) => (
+                    <li key={feature}>{feature}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </section>
+        )}
+
+        {location.adventureRelevance && (
+          <section>
+            <h3>Adventure Relevance</h3>
+            <p>
+              {location.isDmSpoiler && !dmMode
+                ? "Enable DM Notes to reveal adventure-facing context for this location."
+                : location.adventureRelevance}
+            </p>
+          </section>
+        )}
 
         <section>
           <h3>DM Hooks</h3>
-          <ul>
-            {location.hooks.map((hook) => (
-              <li key={hook}>{hook}</li>
+          <div className="hook-list">
+            {location.dmHooks.map((hook) => (
+              <span key={hook}>{hook}</span>
             ))}
-          </ul>
+          </div>
         </section>
-
-        {location.dmNotes && (
-          <section className={dmMode ? "dm-notes is-visible" : "dm-notes"}>
-            <h3>DM Notes</h3>
-            {dmMode ? <p>{location.dmNotes}</p> : <p>Enable DM Notes to reveal campaign-facing details.</p>}
-          </section>
-        )}
 
         <section>
           <h3>Tags</h3>
@@ -547,6 +713,13 @@ function LorePanel({ location, dmMode, copyState, onClose, onCopy }: LorePanelPr
           </ul>
         </section>
 
+        {location.dmNotes && (
+          <section className={dmMode ? "dm-notes is-visible" : "dm-notes"}>
+            <h3>DM Notes</h3>
+            {dmMode ? <p>{location.dmNotes}</p> : <p>Enable DM Notes to reveal campaign-facing details.</p>}
+          </section>
+        )}
+
         <details>
           <summary>Coordinates and authoring data</summary>
           <dl className="debug-details">
@@ -559,6 +732,14 @@ function LorePanel({ location, dmMode, copyState, onClose, onCopy }: LorePanelPr
             <div>
               <dt>Confidence</dt>
               <dd>{location.positionConfidence}</dd>
+            </div>
+            <div>
+              <dt>Map icon</dt>
+              <dd>{location.mapIconType}</dd>
+            </div>
+            <div>
+              <dt>Spoiler</dt>
+              <dd>{location.isDmSpoiler ? "yes" : "no"}</dd>
             </div>
             <div>
               <dt>ID</dt>
