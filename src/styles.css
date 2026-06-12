@@ -25,6 +25,7 @@ body,
   width: 100%;
   height: 100%;
   margin: 0;
+  overflow: hidden;
 }
 
 button,
@@ -46,6 +47,7 @@ button {
 .map-stage {
   position: relative;
   overflow: hidden;
+  overscroll-behavior: contain;
   background:
     radial-gradient(circle at 15% 20%, rgba(150, 232, 255, 0.1), transparent 26rem),
     linear-gradient(135deg, #071019, #17242b 45%, #251e26);
@@ -106,7 +108,7 @@ button {
 
 .brand-block p,
 .lore-header p,
-.search-field span,
+.search-field label,
 .debug-readout span {
   color: var(--muted);
   font-size: 0.72rem;
@@ -126,6 +128,12 @@ button {
   gap: 4px;
 }
 
+.search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
 .search-field input {
   width: 100%;
   border: 1px solid rgba(199, 244, 255, 0.34);
@@ -134,6 +142,15 @@ button {
   color: #f7fbff;
   background: rgba(4, 10, 16, 0.7);
   outline: none;
+}
+
+.clear-search {
+  border: 1px solid rgba(199, 244, 255, 0.34);
+  border-radius: 6px;
+  padding: 0 10px;
+  color: #eef8fb;
+  background: rgba(4, 10, 16, 0.62);
+  font-weight: 800;
 }
 
 .search-field input:focus {
@@ -171,7 +188,7 @@ button {
   accent-color: var(--frost);
 }
 
-.filter-panel,
+.atlas-panel,
 .results-panel {
   position: absolute;
   z-index: 500;
@@ -181,10 +198,11 @@ button {
   padding: 12px;
 }
 
-.filter-panel {
+.atlas-panel {
   top: 104px;
   max-height: calc(100vh - 212px);
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .results-panel {
@@ -220,55 +238,6 @@ button {
   padding: 4px 8px;
 }
 
-.filter-list {
-  display: grid;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.preset-row,
-.chapter-list,
-.segmented-control {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.preset-row button,
-.chapter-list button,
-.segmented-control button {
-  min-height: 30px;
-  border: 1px solid rgba(199, 244, 255, 0.18);
-  border-radius: 6px;
-  padding: 5px 8px;
-  color: #dcecf2;
-  background: rgba(4, 10, 16, 0.34);
-}
-
-.preset-row button:hover,
-.chapter-list button:hover,
-.segmented-control button:hover,
-.chapter-list button.is-active,
-.segmented-control button.is-active {
-  border-color: rgba(150, 232, 255, 0.58);
-  color: #fff;
-  background: rgba(57, 125, 142, 0.34);
-}
-
-.filter-group {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(199, 244, 255, 0.12);
-}
-
-.filter-group h2 {
-  margin: 0;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-}
-
-.filter-list button,
 .result-list button {
   display: flex;
   align-items: center;
@@ -284,14 +253,12 @@ button {
   text-align: left;
 }
 
-.filter-list button.is-active,
 .result-list button.is-selected {
   border-color: rgba(150, 232, 255, 0.58);
   color: #fff;
   background: rgba(57, 125, 142, 0.34);
 }
 
-.filter-dot,
 .legend-dot {
   display: inline-block;
   width: 0.7rem;
@@ -310,10 +277,6 @@ button {
   box-shadow: 0 0 12px currentColor;
 }
 
-.filter-dot {
-  margin-right: auto;
-}
-
 .town {
   color: #9eeaff;
 }
@@ -326,19 +289,23 @@ button {
   color: #f7d27b;
 }
 
-.rime {
-  color: #d4b2ff;
+.river {
+  color: #84cfff;
 }
 
-.settlement {
-  color: #ffb28f;
+.lake {
+  color: #7de0f4;
+}
+
+.rime {
+  color: #d4b2ff;
 }
 
 .dungeon {
   color: #ff8f9d;
 }
 
-.spoiler {
+.faction {
   color: #ffc95e;
 }
 
@@ -355,6 +322,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 5px;
+  white-space: nowrap;
 }
 
 .confidence-visible {
@@ -385,6 +353,7 @@ button {
   max-height: calc(34vh - 44px);
   margin-top: 10px;
   overflow: auto;
+  overscroll-behavior: contain;
   padding-right: 3px;
 }
 
@@ -426,9 +395,9 @@ button {
 
 .map-controls button:hover,
 .panel-title-row button:hover,
+.clear-search:hover,
 .lore-actions button:hover,
 .lore-header button:hover,
-.filter-list button:hover,
 .result-list button:hover {
   border-color: var(--frost);
   background: rgba(57, 125, 142, 0.36);
@@ -709,6 +678,7 @@ button {
 
 .lore-body {
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 18px;
 }
 
@@ -838,12 +808,13 @@ button {
     justify-self: start;
   }
 
-  .filter-panel {
+  .atlas-panel {
     top: auto;
     bottom: 78px;
     width: min(19rem, calc(100vw - 32px));
     max-height: 26vh;
     overflow: auto;
+    overscroll-behavior: contain;
   }
 
   .results-panel {
@@ -885,7 +856,7 @@ button {
     font-size: 1.25rem;
   }
 
-  .filter-panel {
+  .atlas-panel {
     left: 8px;
     bottom: 70px;
     width: calc(100vw - 88px);

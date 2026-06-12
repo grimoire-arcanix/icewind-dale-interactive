@@ -11,7 +11,7 @@ export const locations: LocationEntry[] = [
   {
     id: "bremen",
     name: "Bremen",
-    category: "Ten-Towns",
+    category: "Town",
     x: 1670,
     y: 2166,
     isDmSpoiler: false,
@@ -33,7 +33,7 @@ export const locations: LocationEntry[] = [
   {
     id: "targos",
     name: "Targos",
-    category: "Ten-Towns",
+    category: "Town",
     x: 1755,
     y: 2248,
     isDmSpoiler: false,
@@ -55,7 +55,7 @@ export const locations: LocationEntry[] = [
   {
     id: "bryn-shander",
     name: "Bryn Shander",
-    category: "Ten-Towns",
+    category: "Town",
     x: 1942,
     y: 2398,
     isDmSpoiler: false,
@@ -77,7 +77,7 @@ export const locations: LocationEntry[] = [
   {
     id: "termalaine",
     name: "Termalaine",
-    category: "Ten-Towns",
+    category: "Town",
     x: 2194,
     y: 1935,
     isDmSpoiler: false,
@@ -99,7 +99,7 @@ export const locations: LocationEntry[] = [
   {
     id: "lonelywood",
     name: "Lonelywood",
-    category: "Ten-Towns",
+    category: "Town",
     x: 2077,
     y: 1855,
     isDmSpoiler: false,
@@ -121,7 +121,7 @@ export const locations: LocationEntry[] = [
   {
     id: "good-mead",
     name: "Good Mead",
-    category: "Ten-Towns",
+    category: "Town",
     x: 2353,
     y: 2644,
     isDmSpoiler: false,
@@ -143,7 +143,7 @@ export const locations: LocationEntry[] = [
   {
     id: "dougans-hole",
     name: "Dougan's Hole",
-    category: "Ten-Towns",
+    category: "Town",
     x: 2133,
     y: 2764,
     isDmSpoiler: false,
@@ -165,7 +165,7 @@ export const locations: LocationEntry[] = [
   {
     id: "easthaven",
     name: "Easthaven",
-    category: "Ten-Towns",
+    category: "Town",
     x: 2801,
     y: 2491,
     isDmSpoiler: false,
@@ -187,7 +187,7 @@ export const locations: LocationEntry[] = [
   {
     id: "caer-dineval",
     name: "Caer-Dineval",
-    category: "Ten-Towns",
+    category: "Town",
     x: 2833,
     y: 2172,
     isDmSpoiler: false,
@@ -209,7 +209,7 @@ export const locations: LocationEntry[] = [
   {
     id: "caer-konig",
     name: "Caer-Konig",
-    category: "Ten-Towns",
+    category: "Town",
     x: 2997,
     y: 1940,
     isDmSpoiler: false,
@@ -231,7 +231,7 @@ export const locations: LocationEntry[] = [
   {
     id: "maer-dualdon",
     name: "Maer Dualdon",
-    category: "Geography",
+    category: "Lake",
     x: 1875,
     y: 1993,
     isDmSpoiler: false,
@@ -252,7 +252,7 @@ export const locations: LocationEntry[] = [
   {
     id: "redwaters",
     name: "Redwaters",
-    category: "Geography",
+    category: "Lake",
     x: 2344,
     y: 2744,
     isDmSpoiler: false,
@@ -273,7 +273,7 @@ export const locations: LocationEntry[] = [
   {
     id: "lac-dinneshere",
     name: "Lac Dinneshere",
-    category: "Geography",
+    category: "Lake",
     x: 2930,
     y: 2251,
     isDmSpoiler: false,
@@ -401,13 +401,13 @@ export const locations: LocationEntry[] = [
   {
     id: "shaengarne-river",
     name: "Shaengarne River",
-    category: "Geography",
+    category: "River",
     x: 1260,
     y: 2345,
     isDmSpoiler: false,
     playerFacing: true,
     chapter: null,
-    mapIconType: "geography",
+    mapIconType: "road",
     summary: "A western river that gives travelers a landmark when snow erases lesser signs.",
     lore: "The Shaengarne River threads western Icewind Dale and helps orient travel near Bremen and the western lake approaches. In winter, it is as much obstacle as guide.",
     history: "Rivers in Icewind Dale matter because they create routes, crossings, and boundaries in a landscape where roads can disappear overnight.",
@@ -422,13 +422,13 @@ export const locations: LocationEntry[] = [
   {
     id: "the-redrun",
     name: "The Redrun",
-    category: "Geography",
+    category: "River",
     x: 1260,
     y: 3268,
     isDmSpoiler: false,
     playerFacing: true,
     chapter: null,
-    mapIconType: "geography",
+    mapIconType: "road",
     summary: "A southern watercourse leading toward rough country and mountain approaches.",
     lore: "The Redrun helps mark the southwest of the map, where forest, river, and mountain travel begin to blur. Its remoteness makes it useful for crossings, chases, and survival scenes.",
     history: "The river's name and position make it feel ominous, but most of its value is practical: a line through country where other landmarks vanish under snow.",
@@ -443,7 +443,7 @@ export const locations: LocationEntry[] = [
   {
     id: "ten-trail",
     name: "Ten Trail",
-    category: "Roads & Trails",
+    category: "Road / Trail",
     x: 1655,
     y: 3048,
     isDmSpoiler: false,
@@ -464,7 +464,7 @@ export const locations: LocationEntry[] = [
   {
     id: "the-eastway",
     name: "The Eastway",
-    category: "Roads & Trails",
+    category: "Road / Trail",
     x: 2329,
     y: 2418,
     isDmSpoiler: false,
@@ -485,7 +485,7 @@ export const locations: LocationEntry[] = [
   {
     id: "revels-end",
     name: "Revel's End",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Adventure Location",
     x: 2241,
     y: 539,
     isDmSpoiler: true,
@@ -507,7 +507,7 @@ export const locations: LocationEntry[] = [
   {
     id: "dark-duchess",
     name: "Dark Duchess",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Adventure Location",
     x: 571,
     y: 1541,
     isDmSpoiler: true,
@@ -529,7 +529,7 @@ export const locations: LocationEntry[] = [
   {
     id: "angajuks-bell",
     name: "Angajuk's Bell",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Adventure Location",
     x: 1201,
     y: 1494,
     isDmSpoiler: true,
@@ -551,7 +551,7 @@ export const locations: LocationEntry[] = [
   {
     id: "black-cabin",
     name: "Black Cabin",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Adventure Location",
     x: 2314,
     y: 1541,
     isDmSpoiler: true,
@@ -573,7 +573,7 @@ export const locations: LocationEntry[] = [
   {
     id: "lost-spire-of-netheril",
     name: "Lost Spire of Netheril",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Dungeon / Ruin",
     x: 3647,
     y: 1926,
     isDmSpoiler: true,
@@ -595,7 +595,7 @@ export const locations: LocationEntry[] = [
   {
     id: "cave-of-the-berserkers",
     name: "Cave of the Berserkers",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Dungeon / Ruin",
     x: 4028,
     y: 2604,
     isDmSpoiler: true,
@@ -617,7 +617,7 @@ export const locations: LocationEntry[] = [
   {
     id: "wyrmdoom-crag",
     name: "Wyrmdoom Crag",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Adventure Location",
     x: 5054,
     y: 2619,
     isDmSpoiler: true,
@@ -639,7 +639,7 @@ export const locations: LocationEntry[] = [
   {
     id: "skytower-shelter",
     name: "Skytower Shelter",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Adventure Location",
     x: 4482,
     y: 2989,
     isDmSpoiler: true,
@@ -661,7 +661,7 @@ export const locations: LocationEntry[] = [
   {
     id: "cackling-chasm",
     name: "Cackling Chasm",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Dungeon / Ruin",
     x: 3164,
     y: 3174,
     isDmSpoiler: true,
@@ -683,7 +683,7 @@ export const locations: LocationEntry[] = [
   {
     id: "jarlmoot",
     name: "Jarlmoot",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Dungeon / Ruin",
     x: 645,
     y: 2634,
     isDmSpoiler: true,
@@ -705,7 +705,7 @@ export const locations: LocationEntry[] = [
   {
     id: "karkolohk",
     name: "Karkolohk",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Faction Site",
     x: 293,
     y: 3543,
     isDmSpoiler: true,
@@ -727,7 +727,7 @@ export const locations: LocationEntry[] = [
   {
     id: "id-ascendant",
     name: "Id Ascendant",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Adventure Location",
     x: 2080,
     y: 3790,
     isDmSpoiler: true,
@@ -749,7 +749,7 @@ export const locations: LocationEntry[] = [
   {
     id: "sunblight",
     name: "Sunblight",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Dungeon / Ruin",
     x: 2461,
     y: 3697,
     isDmSpoiler: true,
@@ -771,7 +771,7 @@ export const locations: LocationEntry[] = [
   {
     id: "island-of-solstice",
     name: "Island of Solstice",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Adventure Location",
     x: 806,
     y: 528,
     isDmSpoiler: true,
@@ -793,7 +793,7 @@ export const locations: LocationEntry[] = [
   {
     id: "grimskalle",
     name: "Grimskalle",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Dungeon / Ruin",
     x: 850,
     y: 542,
     isDmSpoiler: true,
@@ -815,7 +815,7 @@ export const locations: LocationEntry[] = [
   {
     id: "caves-of-hunger",
     name: "Caves of Hunger",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Dungeon / Ruin",
     x: 5010,
     y: 786,
     isDmSpoiler: true,
@@ -837,7 +837,7 @@ export const locations: LocationEntry[] = [
   {
     id: "ythryn",
     name: "Ythryn",
-    category: "Rime of the Frostmaiden Locations",
+    category: "Dungeon / Ruin",
     x: 5566,
     y: 1325,
     isDmSpoiler: true,

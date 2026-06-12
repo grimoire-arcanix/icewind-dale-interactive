@@ -1,11 +1,12 @@
 export type LocationCategory =
-  | "Ten-Towns"
+  | "Town"
   | "Geography"
-  | "Roads & Trails"
-  | "Rime of the Frostmaiden Locations"
-  | "Settlements"
-  | "Dungeons / Ruins"
-  | "DM / Spoiler";
+  | "Road / Trail"
+  | "River"
+  | "Lake"
+  | "Adventure Location"
+  | "Dungeon / Ruin"
+  | "Faction Site";
 
 export type LocationChapter =
   | "Chapter 1"
@@ -44,6 +45,7 @@ export interface LocationEntry {
   summary: string;
   lore: string;
   history?: string;
+  travelContext?: string;
   notableFeatures: string[];
   notablePeopleOrFactions: string[];
   adventureRelevance?: string;
